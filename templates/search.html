@@ -1,0 +1,106 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Search Results - Music Streaming</title>
+
+  <!-- Tailwind CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.1.4/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'search-style.css' %}">
+</head>
+
+<body class="bg-black text-white flex">
+
+  <!-- Sidebar -->
+  <div class="sidebar w-60 bg-gray-900 min-h-screen flex flex-col justify-between">
+    <div>
+      <div class="logo-container p-6">
+        <img src="https://storage.googleapis.com/pr-newsroom-wp/1/2018/11/Spotify_Logo_RGB_Green.png"
+             alt="Spotify Logo"
+             class="w-full h-auto">
+      </div>
+
+      <div class="sidebar-section flex flex-col space-y-2 px-6">
+        <a href="/" class="sidebar-link text-gray-300 hover:text-white">🏠 Home</a>
+        <a href="/search" class="sidebar-link text-white font-semibold">🔍 Search</a>
+        <a href="#" class="sidebar-link text-gray-300 hover:text-white">🎵 Your Library</a>
+      </div>
+    </div>
+
+     
+  </div>
+
+  <!-- Main Content -->
+  <div class="flex-1 p-8 overflow-y-auto">
+
+    <!-- Search Bar -->
+    <header class="flex justify-between items-center mb-8">
+      <form method="get" action="{% url 'search' %}" class="flex items-center space-x-2">
+        <input 
+          type="search" 
+          name="search_query" 
+          value="{{ query }}" 
+          placeholder="What do you want to listen to?"
+          class="p-2 w-96 rounded-lg text-black"
+          required>
+        <select name="type" class="p-2 rounded-lg text-black">
+          <option value="tracks" {% if search_type == 'tracks' %}selected{% endif %}>Tracks</option>
+          <option value="artists" {% if search_type == 'artists' %}selected{% endif %}>Artists</option>
+        </select>
+        <button type="submit" class="bg-green-500 text-black px-4 py-2 rounded-lg font-semibold hover:bg-green-400">
+          Search
+        </button>
+      </form>
+    </header>
+
+    <!-- Search Results -->
+    <h2 class="text-2xl font-bold mb-6">
+      {% if query %}
+        Results for "{{ query }}"
+      {% else %}
+        Search for your favorite songs or artists 🎧
+      {% endif %}
+    </h2>
+
+    {% if results %}
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {% for item in results %}
+          {% if search_type == "artists" %}
+            <!-- 🎤 Artist Card -->
+            <a href="{% url 'profile' item.id %}" class="block bg-gray-900 p-4 rounded-lg hover:bg-gray-800 transition duration-200">
+              {% if item.profile_picture %}
+                <img src="{{ item.profile_picture.150x150 }}" alt="{{ item.name }}" class="rounded-full mb-3 w-48 h-48 mx-auto object-cover">
+              {% else %}
+                <img src="https://via.placeholder.com/150" alt="artist" class="rounded-full mb-3 w-48 h-48 mx-auto object-cover">
+              {% endif %}
+              <h3 class="font-semibold text-lg text-center">{{ item.name }}</h3>
+              <p class="text-gray-400 text-sm text-center">@{{ item.handle }}</p>
+            </a>
+
+          {% else %}
+            <!-- 🎵 Track Card -->
+            <a href="{% url 'music' item.id %}" class="block bg-gray-900 p-4 rounded-lg hover:bg-gray-800 transition duration-200">
+              {% if item.artwork %}
+                <img src="{{ item.artwork.150x150 }}" alt="{{ item.title }}" class="rounded-lg mb-3 w-full h-48 object-cover">
+              {% else %}
+                <img src="https://via.placeholder.com/150" alt="track" class="rounded-lg mb-3 w-full h-48 object-cover">
+              {% endif %}
+              <h3 class="font-semibold text-lg truncate">{{ item.title }}</h3>
+              {% if item.user %}
+                <p class="text-gray-400 text-sm">by {{ item.user.name }}</p>
+              {% endif %}
+            </a>
+          {% endif %}
+        {% endfor %}
+      </div>
+    {% else %}
+      {% if query %}
+        <p class="text-gray-400 mt-10">No results found for "{{ query }}" 😕</p>
+      {% endif %}
+    {% endif %}
+  </div>
+
+</body>
+</html>
